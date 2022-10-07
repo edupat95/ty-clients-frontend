@@ -19,7 +19,7 @@ export const Login = () => {
   const handleClick = async () => {
     //console.log("Datos que tengo que mandar: " + username + " - " + password);
     const user = await login(username, password); 
-    console.log("Login page/handleclick -> " + JSON.stringify(user));
+    //console.log("Login page/handleclick -> " + JSON.stringify(user));
     if(user === 401){
       console.log("Error en las credenciales");
       setErrorLogin("Error en las credenciales");
@@ -30,7 +30,7 @@ export const Login = () => {
       setErrorLogin('');
       await dispatch(createUser(createUserAdapter(user)));
       await localStorage.setItem('user', JSON.stringify(user));
-      console.log("Desde login: " + localStorage.getItem('user'))
+      //console.log("Desde login: " + localStorage.getItem('user'))
       setStatusLogin(true); //se puede redireccionar de otra forma, no se cual seria la mejor.
     }
     
