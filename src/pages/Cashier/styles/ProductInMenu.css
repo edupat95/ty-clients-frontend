@@ -1,0 +1,27 @@
+.principalContainer{
+    border: thin solid gray;
+    border-radius: 5%;
+    padding: 1rem;
+    background-color: rgb(68, 64, 65)
+}
+
+.principalContainer:nth-child{
+    background-color: red;
+}
+
+.secondaryContainer{
+    display: flex; 
+    font-size: 20px
+}
+
+.firstColumn{
+    width: 50%;
+    text-align: left;
+    align-items: left
+}
+
+.secondColumn{
+    width: 50%;
+    text-align: right;
+    align-items: right
+}

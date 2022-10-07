@@ -1,0 +1,40 @@
+.cashierContainer {
+  display: flex; 
+  font-size: 20px;
+
+}
+
+.cashierContainerLeft{
+  width: 35%;
+  text-align: left;
+  align-items: left; 
+}
+
+.containterProductMenu {
+  height: 800px;
+  overflow-y: scroll;
+  scrollbar-color: rebeccapurple green;
+  scrollbar-width: thin;
+  text-align: left;
+  align-items: left;
+}
+
+.cashierContainerRight{
+  width: 60%;
+  margin-left: 50px
+}
+
+.cartProductsContainer{
+  background-color: rgb(62, 60, 60);
+  height: 230px;
+  overflow-y: scroll;
+  scrollbar-color: rebeccapurple green;
+  scrollbar-width: thin;
+  text-align: center;
+  align-items: center;
+}
+
+.scannContainer{
+  margin-top: 30px;
+  padding-top: 50px,
+}
