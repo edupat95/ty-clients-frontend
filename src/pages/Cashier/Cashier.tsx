@@ -4,41 +4,42 @@ import "./styles/Cashier.css";
 import { Product } from "../../models/Cashier/product.model"
 import { cashierReducer, cashierInitialState } from "../Cashier/reducer/cashier.reducer";
 import { createProductAdapter } from '../../adapters/Cashier/product.adapter';
-import ProductInMenu from './components/ProductInMenu';
+import ProductInMenuComponent from './components/ProductInMenuComponent';
 import ProductInCartComponent from './components/ProductInCartComponent';
 import { calculateTotalPoints, calculateTotalReward, calculateTotalPrice } from './utilities/cashier.utilities';
 import Scann from './components/Scann';
 import { Customer } from '../../models/Cashier/customer.model';
-import { Navigate } from 'react-router-dom';
-import { getSession } from '../../utilities/public.utilities';
+import { useNavigate } from 'react-router-dom';
+import { getCashier, getSession } from '../../utilities/public.utilities';
+import CabeceraComponent from '../../components/CabeceraComponent';
 
 export const Cashier = () => {
+  const navigate = useNavigate();
   const [cashierState, dispatch] = useReducer(cashierReducer, cashierInitialState);
   const { products, cart } = cashierState;
   const [scanState, setScanState] = useState(false);
   const [errorSerch, setErrorSerch] = useState('');
   const [customer, setCustomer] = useState<Customer>();
-  const [logout,setLogout] = useState(false);
-
+  
   useEffect(() => {
+    getCashier().id ? console.log(JSON.stringify(getCashier())) : handleLogout();
+    
     const interval=setInterval(()=>{      
       setErrorSerch('');
     },5000)
-
+    
     return() => {
       clearInterval(interval)
     }
+
   }, []);
 
   const handleShowProductMenu = async () => {
     const res = await getProducts();
-    //Cambiamos el tipo de res a un Array<Product>
     let aux_arr: Array<Product> = [];
     for (let producto in res) {
-      //console.log("DENTRO DEL FOR->" + createProductAdapter(res[producto]).nombre);
       aux_arr.push(createProductAdapter(res[producto]));
     }
-    //Finalizamos cabmio de tipo
 
     dispatch({ type: "LIST_PRODUCT_MENU", payload: aux_arr });
   }
@@ -58,13 +59,14 @@ export const Cashier = () => {
   };
 
   const handleLogout = () => {
-    setLogout(true)
+    localStorage.clear();
+    navigate('/login');
   }
 
   const handleBuyCart = async () => {
     if(customer){
-      if(await buyCart( customer.memberClub.id  , calculateTotalReward(cart) )){
-        alert("Venta exitosa +"+calculateTotalReward(cart)+"pts");
+      if(await buyCart( customer.member.id , cart)){
+        alert("Venta exitosa " + (customer ? customer.member.idDocumento.nombres + " " + customer.member.idDocumento.apellidos : ""  ) + " + " +calculateTotalReward(cart)+"pts");
         dispatch({type: "CLEAR_CART"});
         setCustomer(undefined);
       } else {
@@ -78,17 +80,19 @@ export const Cashier = () => {
   }
 
   const handleChangeCart = async () => {
-
-    if((customer ? customer.memberClub.puntosClub : -1) >= calculateTotalPoints(cart) ){
-      if(await changeCart((customer ? customer.memberClub.id : 0) , calculateTotalPoints(cart) )){
-        alert("Canje exitoso, -"+ calculateTotalReward(cart) +"pts");
+    
+    if(customer){
+      if(await changeCart( customer.member.id , cart)){
+        alert("Canje exitoso, " + (customer ? customer.member.idDocumento.nombres + " " + customer.member.idDocumento.apellidos : ""  ) + " -"+ calculateTotalPoints(cart) +"pts");
         dispatch({type: "CLEAR_CART"});
         setCustomer(undefined);
       } else {
         alert("ERROR: NO SE PUEDE REALIZAR EL CANGE");
-      }
+      }  
     } else {
-      alert("ERROR: EL CLIENTE NO POSEE LOS SUFICIENTES PUNTOS")
+      alert("VENTA EXITOSA A CLIENTE NO ASOCIADO");
+      dispatch({type: "CLEAR_CART"});
+      setCustomer(undefined);
     }
       
   }
@@ -96,21 +100,7 @@ export const Cashier = () => {
 
   return (
     <>
-      {logout && (
-            <Navigate to="/" replace={true} />
-          )
-        }
-      <div style={{display: "flex"}}>
-        <div >
-          <p> { "Cajero: "+ (getSession().firstName ? getSession().firstName : setLogout(true))  } </p>
-        </div>
-        <div style={{paddingLeft: "50px"}}>
-          <p> {"Empresa: " + (getSession().club.nombre ? getSession().club.nombre : setLogout(true))} </p>
-        </div>
-        <div style={{paddingLeft: "70%"}}>
-          <button onClick={() => handleLogout()}> SALIR </button>
-        </div>
-      </div>
+      <CabeceraComponent/>
       <div className='cashierContainer'>
         <div className='cashierContainerLeft'>
           <div style={{ textAlign: 'center' }}>
@@ -118,7 +108,10 @@ export const Cashier = () => {
           </div>
           <div className='containterProductMenu'>
             {products.map((product) => (
-              <ProductInMenu key={product.id} product={product} addToCart={(product: Product) => { dispatch({ type: "ADD_TO_CART", payload: product }); }} />
+              <ProductInMenuComponent 
+              key={product.id} 
+              product={product} 
+              addToCart={(product: Product) => { dispatch({ type: "ADD_TO_CART", payload: product }); }} />
             ))}
           </div>
         </div>

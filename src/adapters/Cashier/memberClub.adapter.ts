@@ -8,7 +8,8 @@ export const createMemberClubAdapter = (memberClub: any) => ({
       id: memberClub.idAsociado.id,
       estado: memberClub.idAsociado.estado
   },
-  club: memberClub.club    
+  club: memberClub.club,
+  idRegistrador: memberClub.idRegistrador
 });
 
 

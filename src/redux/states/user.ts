@@ -17,6 +17,7 @@ export const UserEmptyState: User = {
     direccion: '',
     estado: false
   }
+
 };
 
 export const userSlice = createSlice({

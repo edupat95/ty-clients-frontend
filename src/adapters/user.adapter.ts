@@ -8,5 +8,6 @@ export const createUserAdapter = (user: any) => ({
   imageUrl: user.imageUrl,
   activated: user.activated,
   langKey: user.langKey,
-  club: user.club
+  club: user.club,
+  worker: user.worker
 });

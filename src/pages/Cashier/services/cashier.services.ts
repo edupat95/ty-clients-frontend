@@ -6,14 +6,14 @@ import { createMemberClubAdapter } from '../../../adapters/Cashier/memberClub.ad
 import { Member } from '../../../models/Cashier/member.model';
 import { createMemberAdapter } from '../../../adapters/Cashier/member.adapter';
 import { createCustomerAdapter } from '../../../adapters/Cashier/customer.adapter';
-import { getSession } from '../../../utilities/public.utilities';
+import { getCashier, getSession } from '../../../utilities/public.utilities';
+import { ProductInCart } from '../../../models/Cashier/productInCart.model';
 
 
-const API_URL: string = "http://localhost:8080/api";
+const API_URL: string = "http://localhost:8080/api"; //HARCODE
 
 const getProducts = async () => {
-  //console.log("Cargando productos para user--> " + getSession().id_token );
-  const res = await axios.get<Array<Product>>(API_URL + `/productos/activos`, { //Hardcode
+  const res = await axios.get<Array<Product>>(API_URL + `/productos/activos`, { 
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + getSession().id_token
@@ -24,7 +24,6 @@ const getProducts = async () => {
     console.error("Error al pedir el menu de products. Type error -> " + error.response.status);
     return error.response.status;
   });
-  //console.log(res.data);
 
   return res.data;
 };
@@ -32,6 +31,7 @@ const getProducts = async () => {
 
 const getCustomer = async (identificador: string) => {
   // TOKEN DE SESION DE USUARIO.
+  console.log("Entra a getCustomer");
   const res = await axios.get<MemberClub>(`http://localhost:8080/api/asociado-clubs/club/${getSession().club.id}/ident/${identificador}`, { //Hardcode buscamos al asociado-club
     headers: {
       'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const getCustomer = async (identificador: string) => {
     console.error("Error al pedir los datos de MemberClub. Type error -> " + error);
     return error;
   });
-  
+
   switch(res.code){
     case "ERR_NETWORK":
       return 0;
@@ -53,7 +53,9 @@ const getCustomer = async (identificador: string) => {
       break;
   }
 
-  const res2 = await axios.get<Member>(`http://localhost:8080/api/asociados/${res.data.idAsociado.id}`, { //Hardcode buscamos al asociado
+  //console.log("DATOS DE RES: ", res.data);
+  
+  const res2 = await axios.get<Member>(API_URL + `/asociados/${res.data.idAsociado.id}`, { //Hardcode buscamos al asociado
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + getSession().id_token
@@ -65,6 +67,7 @@ const getCustomer = async (identificador: string) => {
     return error;
   });
 
+  //console.log("DATOS DE RES2: ", res2.data);
   
   switch(res2.code){
     case "ERR_NETWORK":
@@ -74,7 +77,10 @@ const getCustomer = async (identificador: string) => {
     default:
       break;
   }
-  
+
+  console.log(res);
+  console.log(res2);
+
   if ((res.status === 200 && res2.status === 200)) {
     const memberClub = createMemberClubAdapter(res.data);
     //console.log("memberClub: " + JSON.stringify(memberClub));
@@ -84,29 +90,44 @@ const getCustomer = async (identificador: string) => {
       memberClub: memberClub,
       member: member
     }
-    
+   
     return createCustomerAdapter(customer);
   }
 }
 
-const buyCart = async (idComprador: number, puntosRecompensa: number) => {
+const buyCart = async (idComprador: number, cart: Array<ProductInCart>) => {
+  let productos = [{}];
+  productos.pop();
   
+  cart.forEach((product) => {
+    productos.push({
+      "id": product.product.id,
+      "cantidad": product.quantity
+    });
+  });
   const data = { 
-    "id": idComprador,
-    "puntosClub": puntosRecompensa
+    "Venta": {
+      "costoTotal": 0,
+      "costoTotalPuntos": 0,
+      "idCajero": {"id": getCashier().id},
+      "idAsociado": {"id": idComprador}
+    },
+    "Productos": productos
   }
-  //console.log("La data de buy es:", data);
-  const res = await axios.patch(`http://localhost:8080/api/asociado-clubs/venta/${idComprador}/`, data, { //hardcode
+
+  const res = await axios.post(API_URL + `/ventas/create`, data, { //hardcode
   headers: {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + getSession().id_token
-  },
+    },
   }).then(function (response) {
     return response.status;
   }).catch(function (error) {
     console.error("Error al intentar realizar la compra. Type error -> " + error.response.status);
     return error.response.status;
   });
+
+  console.log("OBJETO ENVIADO AL REALZIAR LA COMPRA -------------->" + JSON.stringify(data));
   
   if(res === 200){
     return true;
@@ -115,25 +136,40 @@ const buyCart = async (idComprador: number, puntosRecompensa: number) => {
   }
 }
 
-const changeCart = async (idComprador: number, costoPuntos: number) => {
-  const data = { 
-    "id": idComprador,
-    "puntosClub": costoPuntos
-  }
-  console.log("La data de buy es:", data);
+const changeCart = async (idComprador: number, cart: Array<ProductInCart>) => {
+  let productos = [{}];
+  productos.pop();
   
-  const res = await axios.patch(`http://localhost:8080/api/asociado-clubs/canje/${idComprador}/`, data, { //hardcode
+  cart.forEach((product) => {
+    productos.push({
+      "id": product.product.id,
+      "cantidad": product.quantity
+    });
+  });
+  const data = { 
+    "Venta": {
+      "costoTotal": 0,
+      "costoTotalPuntos": 0,
+      "idCajero": {"id": getCashier().id},
+      "idAsociado": {"id": idComprador}
+    },
+    "Productos": productos
+  }
+
+  const res = await axios.post(API_URL + `/ventas/create/cange`, data, { //hardcode
   headers: {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer ' + getSession().id_token
-  },
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + getSession().id_token
+    },
   }).then(function (response) {
     return response.status;
   }).catch(function (error) {
-    console.error("Error al intentar realizar la compra. Type error -> " + error.response.status);
+    console.error("Error al intentar realizar el cange. Type error -> " + error.response.status);
     return error.response.status;
   });
 
+  //console.log("OBJETO ENVIADO AL REALZIAR EL CANGE -------------->" + JSON.stringify(data));
+  
   if(res === 200){
     return true;
   } else {

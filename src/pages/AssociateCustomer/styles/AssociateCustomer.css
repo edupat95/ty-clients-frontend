@@ -1,0 +1,27 @@
+.associateCustomerContainer{
+    display: flex;
+}
+.dataDniContainer {
+    margin-top: 5%;
+    width: 100%;
+    font-size: 30px;
+  }
+
+.qrContainer{
+    display: flex;
+    margin-top: 5%;
+    margin-right: 25%;
+    background-color: white;
+    align-items: center;
+}
+
+.qrImage{
+    margin-left: 22%;
+    width: 100%;
+    margin-bottom: 5%;
+}
+
+.qrText{
+    font-size: 30px;
+    margin-left: 25%;
+}

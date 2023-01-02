@@ -13,7 +13,7 @@ interface Props {
 const ProductInCartComponent: FC<Props> = ({ productInCart, addOneToCart , removeOneFromCart , removeAllFromCart}) => {
   return (
     <div style={{borderBottom: "thin solid gray", paddingLeft: 10}}>
-      <h5>{productInCart.product.nombre} X{productInCart.quantity} {"|| Precio: "} ${productInCart.product.precio*productInCart.quantity}{"(Pts:"+ productInCart.product.costoPuntos*productInCart.quantity +")"} {"|| Recompensa: "} {productInCart.product.puntosRecompensa*productInCart.quantity}pts <button onClick={() => {addOneToCart(productInCart.product)}}> + </button> <button onClick={() => {removeOneFromCart(productInCart.product)}}> - </button> <button onClick={() => {removeAllFromCart(productInCart.product)}}> Quitar todos </button></h5>
+      <h5>{productInCart.product.nombre} {"|| Precio: "} ${productInCart.product.precio*productInCart.quantity}{"(Pts:"+ productInCart.product.costoPuntos*productInCart.quantity +")"} {"|| Recompensa: "} {productInCart.product.puntosRecompensa*productInCart.quantity}pts (X{productInCart.quantity})<button onClick={() => {addOneToCart(productInCart.product)}}> + </button> <button onClick={() => {removeOneFromCart(productInCart.product)}}> - </button> <button onClick={() => {removeAllFromCart(productInCart.product)}}> Quitar todos </button></h5>
     </div>
   )
 }

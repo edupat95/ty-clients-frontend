@@ -1,3 +1,4 @@
+import { Recorder } from "../AssociateCustomer/recorder.model"
 import { Club } from "../club.model"
 
 export interface MemberClub {
@@ -10,5 +11,6 @@ export interface MemberClub {
         id: number,
         estado: boolean
     },
-    club: Club    
+    club: Club,
+    idRegistrador: Recorder 
 }
